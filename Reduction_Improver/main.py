@@ -62,7 +62,6 @@ def get_grok_api_key():
         placeholder="Enter your xAI API key",
         key="grok_api_key_input",
         type="password",
-        value=os.getenv("GROK_API_KEY", ""),
     )
     return input_text
 
@@ -89,7 +88,7 @@ with col1:
     st.markdown("Re-write your text in different styles.")
 
 with col2:
-    st.write("Subscribe to [dswithbappy](https://www.youtube.com/@dswithbappy)")
+    st.write("Subscribe to [Sumsed Tareq Jami](https://www.youtube.com/@dswithbappy)")
 
 
 # Input Grok API Key
