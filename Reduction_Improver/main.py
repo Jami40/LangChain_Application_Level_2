@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import html
 from dotenv import load_dotenv
 from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
@@ -162,9 +163,49 @@ st.markdown(
         font-weight: 700 !important;
     }
     div[data-testid="stVerticalBlockBorderWrapper"] {
-        border: 1px solid #e9d5ff;
+        border: 2px solid #c4b5fd !important;
         border-radius: 18px;
-        background: rgba(255, 255, 255, 0.68);
+        background: #ffffff !important;
+        box-shadow: 0 8px 24px rgba(124, 58, 237, 0.08);
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"]
+    div[data-testid="stMarkdownContainer"] {
+        color: #1e293b !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"]
+    div[data-testid="stMarkdownContainer"] p,
+    div[data-testid="stVerticalBlockBorderWrapper"]
+    div[data-testid="stMarkdownContainer"] li,
+    div[data-testid="stVerticalBlockBorderWrapper"]
+    div[data-testid="stMarkdownContainer"] strong,
+    div[data-testid="stVerticalBlockBorderWrapper"]
+    div[data-testid="stMarkdownContainer"] em {
+        color: #1e293b !important;
+        line-height: 1.7;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"]
+    div[data-testid="stMarkdownContainer"] h1,
+    div[data-testid="stVerticalBlockBorderWrapper"]
+    div[data-testid="stMarkdownContainer"] h2,
+    div[data-testid="stVerticalBlockBorderWrapper"]
+    div[data-testid="stMarkdownContainer"] h3 {
+        color: #4c1d95 !important;
+    }
+    .output-text {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 1.25rem 1.4rem;
+        border: 2px solid #c4b5fd;
+        border-radius: 16px;
+        background: #ffffff !important;
+        color: #111827 !important;
+        font-size: 1rem;
+        line-height: 1.75;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+    .output-text * {
+        color: #111827 !important;
     }
     </style>
     """,
@@ -270,5 +311,8 @@ if submitted:
         st.error(f"Groq rejected the request: {error}")
         st.stop()
 
-    with st.container(border=True):
-        st.markdown(improved_redaction.content)
+    output_text = html.escape(improved_redaction.content).replace("\n", "<br>")
+    st.markdown(
+        f'<div class="output-text">{output_text}</div>',
+        unsafe_allow_html=True,
+    )
