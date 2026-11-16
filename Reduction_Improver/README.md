@@ -8,9 +8,10 @@
 
 4. streamlit run main.py
 
-Enter your own Grok API key in the app when it starts. The key is not loaded
-from `.env` or displayed as a default value. You can optionally set
-`GROK_MODEL`; it defaults to `grok-4`.
+Enter your own **Groq** API key in the app when it starts. Create one at
+[console.groq.com](https://console.groq.com/keys). The key is not loaded from
+`.env` or displayed as a default value. You can optionally set `GROQ_MODEL`;
+it defaults to `llama-3.3-70b-versatile`.
 
 
 input demo:

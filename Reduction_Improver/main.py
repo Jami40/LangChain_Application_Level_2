@@ -2,7 +2,8 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 from langchain_core.prompts import PromptTemplate
-from langchain_xai import ChatXAI
+from langchain_groq import ChatGroq
+from groq import AuthenticationError, BadRequestError
 
 
 load_dotenv()
@@ -47,20 +48,20 @@ prompt = PromptTemplate(
 
 
 # LLM and key loading function
-def load_llm(grok_api_key):
-    """Create the xAI chat model used for rewriting."""
-    return ChatXAI(
-        model=os.getenv("GROK_MODEL", "grok-4"),
+def load_llm(groq_api_key):
+    """Create the Groq chat model used for rewriting."""
+    return ChatGroq(
+        model=os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
         temperature=0.7,
-        api_key=grok_api_key,
+        groq_api_key=groq_api_key,
     )
 
 
-def get_grok_api_key():
+def get_groq_api_key():
     input_text = st.text_input(
-        label="Grok API Key",
-        placeholder="Enter your xAI API key",
-        key="grok_api_key_input",
+        label="Your Groq API key",
+        placeholder="Enter your Groq API key (usually starts with gsk_)",
+        key="groq_api_key_input",
         type="password",
     )
     return input_text
@@ -68,68 +69,188 @@ def get_grok_api_key():
 
 def get_draft():
     draft_text = st.text_area(
-        label="Text",
-        label_visibility="collapsed",
-        placeholder="Your Text...",
+        label="Paste your draft here",
+        placeholder="Type or paste the text you want to rewrite...",
         key="draft_input",
+        height=180,
     )
     return draft_text
 
 
-#Page title and header
-st.set_page_config(page_title="Re-write your text")
-st.header("Re-write your text")
+st.set_page_config(
+    page_title="Rewrite Studio",
+    page_icon="✨",
+    layout="wide",
+)
+
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background: linear-gradient(135deg, #fff7ed 0%, #f5f3ff 48%, #ecfeff 100%);
+    }
+    .block-container {
+        max-width: 1100px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
+    .hero {
+        padding: 2.2rem 2.5rem;
+        border-radius: 28px;
+        color: white;
+        background: linear-gradient(120deg, #7c3aed, #db2777 55%, #f97316);
+        box-shadow: 0 18px 45px rgba(124, 58, 237, 0.22);
+        margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+        margin: 0;
+        font-size: 2.8rem;
+        letter-spacing: -0.04em;
+    }
+    .hero p {
+        margin: 0.65rem 0 0;
+        font-size: 1.08rem;
+        opacity: 0.92;
+    }
+    .section-title {
+        color: #4c1d95;
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin: 1.25rem 0 0.6rem;
+    }
+    .hint {
+        color: #64748b;
+        font-size: 0.92rem;
+    }
+    div[data-testid="stTextArea"] textarea,
+    div[data-testid="stTextInput"] input {
+        border: 2px solid #ddd6fe;
+        border-radius: 14px;
+        background: #ffffff !important;
+        color: #1e293b !important;
+        caret-color: #7c3aed !important;
+        opacity: 1 !important;
+    }
+    div[data-testid="stTextArea"] label,
+    div[data-testid="stTextInput"] label,
+    div[data-testid="stSelectbox"] label {
+        color: #4c1d95 !important;
+        font-weight: 700 !important;
+    }
+    div[data-testid="stTextArea"] textarea::placeholder,
+    div[data-testid="stTextInput"] input::placeholder {
+        color: #64748b !important;
+        opacity: 1 !important;
+    }
+    div[data-testid="stTextArea"] textarea:focus,
+    div[data-testid="stTextInput"] input:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.16);
+    }
+    div[data-testid="stCaptionContainer"] p {
+        color: #64748b !important;
+    }
+    div[data-testid="stSelectbox"] > div > div {
+        background: #ffffff !important;
+        color: #1e293b !important;
+        border-color: #ddd6fe !important;
+    }
+    button[kind="primary"] {
+        background: linear-gradient(90deg, #7c3aed, #db2777) !important;
+        border: 0 !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        border: 1px solid #e9d5ff;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.68);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <div class="hero">
+        <h1>✨ Rewrite Studio</h1>
+        <p>Turn rough ideas into polished writing with your preferred tone and dialect.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 
-#Intro: instructions
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("Re-write your text in different styles.")
+    st.markdown(
+        '<div class="hint">🎨 Choose a style, paste your draft, and let the '
+        "rewriting assistant do the polishing.</div>",
+        unsafe_allow_html=True,
+    )
 
 with col2:
-    st.write("Subscribe to [Sumsed Tareq Jami](https://www.youtube.com/@dswithbappy)")
+    st.markdown(
+        '<div class="hint">Built with 💜 by '
+        '<a href="https://www.youtube.com/@dswithbappy">Sumsed Tareq Jami</a></div>',
+        unsafe_allow_html=True,
+    )
 
 
-# Input Grok API Key
-st.markdown("## Enter Your Grok API Key")
-grok_api_key = get_grok_api_key()
+with st.form("rewrite_form", clear_on_submit=False):
+    st.markdown('<div class="section-title">🔐 Connect to Groq</div>', unsafe_allow_html=True)
+    groq_api_key = get_groq_api_key()
+    st.caption("Your key is used only for your request and is not shown on screen.")
 
+    st.markdown('<div class="section-title">📝 Your draft</div>', unsafe_allow_html=True)
+    draft_input = get_draft()
+    st.caption("Maximum 700 words")
 
-# Input
-st.markdown("## Enter the text you want to re-write")
-draft_input = get_draft()
+    st.markdown(
+        '<div class="section-title">🎯 Customize your rewrite</div>',
+        unsafe_allow_html=True,
+    )
+    col1, col2 = st.columns(2)
+    with col1:
+        option_tone = st.selectbox(
+            "Tone",
+            ("Formal", "Informal"),
+        )
 
-if len(draft_input.split(" ")) > 700:
-    st.write("Please enter a shorter text. The maximum length is 700 words.")
-    st.stop()
+    with col2:
+        option_dialect = st.selectbox(
+            "English dialect",
+            ("American", "British"),
+        )
 
-# Prompt template tunning options
-col1, col2 = st.columns(2)
-with col1:
-    option_tone = st.selectbox(
-        'Which tone would you like your redaction to have?',
-        ('Formal', 'Informal'))
-    
-with col2:
-    option_dialect = st.selectbox(
-        'Which English Dialect would you like?',
-        ('American', 'British'))
-    
-    
-# Output
-st.markdown("### Your Re-written text:")
+    submitted = st.form_submit_button(
+        "✨ Rewrite my text",
+        type="primary",
+        use_container_width=True,
+    )
 
-if draft_input:
-    if not grok_api_key:
+st.markdown('<div class="section-title">🌟 Your polished text</div>', unsafe_allow_html=True)
+
+if submitted:
+    if not draft_input.strip():
+        st.warning("Please enter some text before rewriting.", icon="✍️")
+        st.stop()
+
+    if len(draft_input.split()) > 700:
+        st.warning("Please enter a shorter text. The maximum length is 700 words.")
+        st.stop()
+
+    if not groq_api_key:
         st.warning(
-            "Please insert a Grok API key. Create one at "
-            "[console.x.ai](https://console.x.ai/)",
+            "Please insert a Groq API key. Create one at "
+            "[console.groq.com](https://console.groq.com/keys)",
             icon="⚠️",
         )
         st.stop()
 
-    llm = load_llm(grok_api_key=grok_api_key)
+    llm = load_llm(groq_api_key=groq_api_key)
 
     prompt_with_draft = prompt.format(
         tone=option_tone, 
@@ -137,6 +258,17 @@ if draft_input:
         draft=draft_input
     )
 
-    improved_redaction = llm.invoke(prompt_with_draft)
+    try:
+        improved_redaction = llm.invoke(prompt_with_draft)
+    except AuthenticationError:
+        st.error(
+            "Groq rejected this API key. Check that it is an active key "
+            "from [console.groq.com](https://console.groq.com/keys)."
+        )
+        st.stop()
+    except BadRequestError as error:
+        st.error(f"Groq rejected the request: {error}")
+        st.stop()
 
-    st.write(improved_redaction.content)
+    with st.container(border=True):
+        st.markdown(improved_redaction.content)
