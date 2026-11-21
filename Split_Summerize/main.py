@@ -1,15 +1,15 @@
 import streamlit as st
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import OpenAI
+from langchain_groq import ChatGroq
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import pandas as pd
 from io import StringIO
 
 #LLM and key loading function
-def load_LLM(openai_api_key):
+def load_LLM(groq_api_key):
     # Make sure your openai_api_key is set as an environment variable
-    llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+    llm = OpenAI(temperature=0, groq_api_key=groq_api_key)
     return llm
 
 
